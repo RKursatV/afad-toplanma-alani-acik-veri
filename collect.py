@@ -4,8 +4,6 @@ scraper.__init__()
 
 allData = {}
 
-toplanmaAlanlari = {}
-
 iller = [[1, "Adana"], [2, "Adıyaman"], [46, "Kahramanmaraş"], [27, "Gaziantep"], [44, "Malatya"], [21, "Diyarbakır"], [79, "Kilis"], [63, "Şanlıurfa"], [31, "Hatay"], [80, "Osmaniye"]]
 
 for ilCode, ilName in iller:
