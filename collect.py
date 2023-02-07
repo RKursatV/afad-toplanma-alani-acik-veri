@@ -34,3 +34,4 @@ for ilCode, ilName in iller:
     dump = json.dumps(allData)
     with open(f"{unidecode.unidecode(ilName)}.json", 'w') as f:
         f.write(dump)
+    allData = {}
