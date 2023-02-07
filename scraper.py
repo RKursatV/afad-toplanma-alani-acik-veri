@@ -113,7 +113,6 @@ def queryPoint(lat,lng):
 
 
 def getFromMap(ilKodu, ilceKodu, mahalleKodu):
-    
     headers = {
     'Host': 'www.turkiye.gov.tr',
     # 'Content-Length': '137',
@@ -156,8 +155,9 @@ def getFromMap(ilKodu, ilceKodu, mahalleKodu):
     queryResults = []
     for q in queries:
         qR = queryPoint(q[0], q[1])
-        if qR is None:
-            continue
+        while qR is None:
+            getToken()
+            qR = queryPoint(q[0], q[1])
         for qRi in qR['features']:
             queryResults.append(qRi)
     return queryResults
