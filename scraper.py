@@ -37,10 +37,8 @@ def getData(payload):
 
     res = session.post(
         'https://www.turkiye.gov.tr/afet-ve-acil-durum-yonetimi-acil-toplanma-alani-sorgulama?submit',
-        cookies=cookies,
         headers=headers,
         data=data,
-        verify=False,
     )
     if res.headers['Content-Type'].startswith('application/json'):
         return res
@@ -71,7 +69,6 @@ def getToken():
     response = session.get(
         'https://www.turkiye.gov.tr/afet-ve-acil-durum-yonetimi-acil-toplanma-alani-sorgulama',
         headers=headers,
-        verify=False,
     )
     return re.search(r'data-token=\"([^"]*)\"', response.text).group(1)
 
@@ -111,7 +108,6 @@ def queryPoint(lat,lng):
         'https://www.turkiye.gov.tr/afet-ve-acil-durum-yonetimi-acil-toplanma-alani-sorgulama?harita=goster&submit',
         headers=headers,
         data=data,
-        verify=False,
     )
     return response.json()
 
@@ -151,7 +147,6 @@ def getFromMap(ilKodu, ilceKodu, mahalleKodu):
         'https://www.turkiye.gov.tr/afet-ve-acil-durum-yonetimi-acil-toplanma-alani-sorgulama?submit',
         headers=headers,
         data=data,
-        verify=False,
     )
     reRes = re.search(r'toplanmaAlanlari = (.*);', res.text).group(1)
     if reRes == 'null':
