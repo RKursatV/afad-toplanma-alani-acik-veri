@@ -156,6 +156,8 @@ def getFromMap(ilKodu, ilceKodu, mahalleKodu):
     queryResults = []
     for q in queries:
         qR = queryPoint(q[0], q[1])
+        if qR is None:
+            continue
         for qRi in qR['features']:
             queryResults.append(qRi)
     return queryResults
