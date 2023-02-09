@@ -1,37 +1,71 @@
+import json
+from typing import Any
 
-import json, scraper, unidecode
-scraper.__init__()
+import unidecode
+from scraper import meeting_areas
 
-allData = {}
+data: dict[str, Any] = {}
 
-iller = [[1, "Adana"], [2, "Adıyaman"], [46, "Kahramanmaraş"], [27, "Gaziantep"], [44, "Malatya"], [21, "Diyarbakır"], [79, "Kilis"], [63, "Şanlıurfa"], [31, "Hatay"], [80, "Osmaniye"]]
+counties: list[list[Any]] = [
+    [1, "Adana"],
+    [2, "Adıyaman"],
+    [46, "Kahramanmaraş"],
+    [27, "Gaziantep"],
+    [44, "Malatya"],
+    [21, "Diyarbakır"],
+    [79, "Kilis"],
+    [63, "Şanlıurfa"],
+    [31, "Hatay"],
+    [80, "Osmaniye"],
+]
+for county_code, county_name in counties:
+    state_response = json.loads(
+        meeting_areas._get_data(f"ilKodu={county_code}&islem=ilceKodu").text
+    )
+    states = state_response["data"]["dataArr"]
+    data[county_name] = {"ilId": county_code, "ilceler": {}}
+    for state in states:
+        data[county_name]["ilceler"][state["name"]] = {
+            "ilceId": state["id"],
+            "mahalleler": {},
+        }
+        district_data = json.loads(
+            meeting_areas._get_data(
+                f"ilKodu={county_code}&ilceKodu={state['id']}&islem=mahalleKodu"
+            ).text
+        )
+        districts = district_data["data"]["dataArr"]
+        for district in districts:
+            data[county_name]["ilceler"][state["name"]]["mahalleler"][
+                district["name"]
+            ] = {
+                "mahalleId": district["id"],
+                "sokaklar": {},
+                "toplanmaAlanlari": {},
+            }
+            streets_data = meeting_areas._get_data(
+                f"ilKodu={county_code}&ilceKodu={state['id']}&sokakKodu={district['id']}&islem=sokakKodu"
+            )
+            streets = json.loads(streets_data.text)
 
-for ilCode, ilName in iller:
-    getirIlce = scraper.getData(f"ilKodu={ilCode}&islem=ilceKodu")
-    dat = json.loads(getirIlce.text)
-    ilceler = (dat['data']['dataArr'])
-    allData[ilName] = {'ilId': ilCode, 'ilceler': {}}
-    for ilce in ilceler:
-        allData[ilName]['ilceler'][ilce['name']] = {'ilceId': ilce['id'], 'mahalleler': {}}
-        getirMahalle = scraper.getData(f"ilKodu={ilCode}&ilceKodu={ilce['id']}&islem=mahalleKodu")
-        dat = json.loads(getirMahalle.text)
-        mahalleler = (dat['data']['dataArr'])
-        for mahalle in mahalleler:
-            allData[ilName]['ilceler'][ilce['name']]['mahalleler'][mahalle['name']] = {'mahalleId': mahalle['id'], 'sokaklar': {}, 'toplanmaAlanlari': {}}
-            getirSokak = scraper.getData(f"ilKodu={ilCode}&ilceKodu={ilce['id']}&sokakKodu={mahalle['id']}&islem=sokakKodu")
-            dat = json.loads(getirSokak.text)
+            results = meeting_areas._get_data_from_map(
+                county_code, state["id"], district["id"]
+            )
+            if results is not None:
+                for result in results:
+                    data[county_name]["ilceler"][state["name"]]["mahalleler"][
+                        district["name"]
+                    ]["toplanmaAlanlari"][result["properties"]["id"]] = result[
+                        "properties"
+                    ]
 
-            queryResults = scraper.getFromMap(ilCode, ilce['id'], mahalle['id'])
-            if queryResults is not None:
-                for queryRes in queryResults:
-                   allData[ilName]['ilceler'][ilce['name']]['mahalleler'][mahalle['name']]['toplanmaAlanlari'][queryRes['properties']['id']] = queryRes['properties']
+            streets_info = streets["data"]["dataArr"]
+            for street in streets_info:
+                data[county_name]["ilceler"][state["name"]]["mahalleler"][
+                    district["name"]
+                ]["sokaklar"][street["name"]] = {"sokakId": street["id"]}
 
-            sokaklar = (dat['data']['dataArr'])
-            for sokak in sokaklar:
-                allData[ilName]['ilceler'][ilce['name']]['mahalleler'][mahalle['name']]['sokaklar'][sokak['name']] = {'sokakId': sokak['id']}
-
-        print(ilce, 'done')
-    dump = json.dumps(allData)
-    with open(f"{unidecode.unidecode(ilName)}.json", 'w') as f:
+        print(state, "done")
+    dump = json.dumps(data)
+    with open(f"{unidecode.unidecode(county_name)}.json", "w") as f:
         f.write(dump)
-    allData = {}
