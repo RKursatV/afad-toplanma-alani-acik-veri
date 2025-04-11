@@ -72,7 +72,7 @@ def getToken():
     )
     return re.search(r'data-token=\"([^"]*)\"', response.text).group(1)
 
-def queryPoint(lat,lng):
+def queryPoint(lng,lat):
     headers = {
     'Host': 'www.turkiye.gov.tr',
     # 'Content-Length': '207',
