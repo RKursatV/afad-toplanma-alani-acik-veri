@@ -3,6 +3,21 @@ https://www.turkiye.gov.tr/afet-ve-acil-durum-yonetimi-acil-toplanma-alani-sorgu
 
 Toplanma bölgeleri her bir mahalle için en fazla beş adet olacak şekilde derlenmiş olup toplanma bölgelerinin seçimi için ilgili mahalle sınırlarının en uzak dört noktası ve merkez konumu baz alınmıştır.
 
+## Kullanım
+
+```bash
+pip install -r requirements.txt
+
+python collect.py                        # cities.json'daki tüm iller (mevcut dosyalar atlanır)
+python collect.py --only Hatay,Adana     # sadece belirtilen iller
+python collect.py --force                # mevcut il dosyalarının üzerine yaz
+python collect.py --workers 2            # paralel istek sayısını düşür
+```
+
+Veriler il başına bir JSON dosyası olarak `iller/` klasörüne kaydedilir, ilerleme `collection.log` dosyasına yazılır. e-Devlet'in önündeki güvenlik duvarı yoğun istekleri zaman zaman engellediğinden istekler otomatik olarak yavaşlatılıp yeniden denenir; toplama işlemi bu nedenle uzun sürebilir.
+
+Not: e-Devlet hizmet sayfası yenilendiği için sokak id'leri artık kaynak tarafından `0` olarak dönmektedir; `sokakId` alanları bu nedenle yeni çekilen verilerde `0` değerini içerir.
+
 
 JSON formatı aşağıdaki yapıda kurgulanmıştır:
 ```
