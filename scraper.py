@@ -253,6 +253,9 @@ class AFADScraper:
             url=f"{self.SERVICE_URL}?submit",
             referer=self.SERVICE_URL,
         )
+        # Kapsama dışı noktalar için API JSON null döndürebiliyor.
+        if not isinstance(payload, dict):
+            return None
         return payload.get("features")
 
     def get_gathering_areas(
@@ -277,7 +280,7 @@ class AFADScraper:
         for lng, lat in self._extract_significant_vertices(coordinates):
             features = self.query_point(lat=lat, lng=lng)
             for feature in features or []:
-                area_id = feature.get("properties", {}).get("id")
+                area_id = (feature.get("properties") or {}).get("id")
                 areas_by_id.setdefault(area_id, feature)
 
         return list(areas_by_id.values()) or None
